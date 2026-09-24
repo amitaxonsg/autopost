@@ -1,19 +1,61 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AutoPost</title>
-<style>
-body{font-family:Arial,sans-serif;margin:0;background:#f6f8fb;color:#13213c}
-nav{background:#0e2a4a;color:white;padding:14px 24px}
-main{max-width:1100px;margin:28px auto;padding:0 18px}
-.card{background:#fff;border:1px solid #dde5ef;border-radius:14px;padding:20px;margin-bottom:18px}
-button{background:#d79a21;color:#fff;border:0;border-radius:8px;padding:10px 14px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{% block title %}AutoPost{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<nav><strong>AutoPost</strong></nav>
-<main>{% block content %}{% endblock %}</main>
+{% if session.get('logged_in') %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">A</span>
+      <span><strong>AutoPost</strong><small>AI Content Workflow</small></span>
+    </a>
+    <nav class="nav">
+      <a class="{{ 'active' if request.endpoint=='dashboard' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a class="{{ 'active' if request.endpoint in ['topics','edit_topic'] else '' }}" href="{{ url_for('topics') }}">Topics & Schedule</a>
+      <a class="{{ 'active' if request.endpoint=='memory' else '' }}" href="{{ url_for('memory') }}">Brand Memory</a>
+      <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('settings') else '' }}" href="{{ url_for('settings') }}">Connections & Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="safety-chip">Draft Only by default</div>
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="link-button" type="submit">Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="main-wrap">
+    <header class="topbar">
+      <div>
+        <strong>Chez Suzette</strong>
+        <span class="muted">AutoPost workspace</span>
+      </div>
+      <a class="support-link" href="mailto:{{ support_email }}">{{ support_email }}</a>
+    </header>
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <span>{{ brand_byline }}</span>
+      <span>·</span>
+      <a href="{{ brand_url }}" target="_blank" rel="noopener">axon.com.sg</a>
+      <span>·</span>
+      <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+    </footer>
+  </div>
+</div>
+{% else %}
+  {% block public_content %}{% endblock %}
+{% endif %}
 </body>
 </html>

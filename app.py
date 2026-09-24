@@ -140,7 +140,7 @@ def process_topic(topic_id):
             get_setting("openai_api_key"),
             get_setting("openai_model", Config.DEFAULT_OPENAI_MODEL),
             topic,
-            read_memory(Flask.current_app) if False else read_memory(_app_ref()),
+            read_memory(_app_ref()),
         )
 
         media_id = None

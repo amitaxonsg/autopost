@@ -1,12 +1,65 @@
 {% extends "base.html" %}
+{% block title %}Dashboard · AutoPost{% endblock %}
 {% block content %}
-<h1>AutoPost Dashboard</h1>
-<div class="card">
-<h2>V1 Dashboard</h2>
-<p>Planned cards: WordPress connection, OpenAI connection, automation status, ready topics, drafts, next scheduled post, and failed jobs.</p>
+<div class="page-head">
+  <div><p class="eyebrow">Overview</p><h1>Content automation at a glance</h1><p class="muted">Create useful content automatically while keeping final publishing control.</p></div>
+  <a class="btn primary" href="{{ url_for('topics') }}">+ Add topic</a>
 </div>
-<div class="card">
-<h2>Publishing Safety</h2>
-<p><strong>Default: Draft Only.</strong> Nothing goes live unless the client explicitly enables auto-publish.</p>
+
+<div class="status-grid">
+  <div class="status-card"><span class="status-dot {{ 'ok' if wp_ready else 'warn' }}"></span><div><small>WordPress</small><strong>{{ 'Connected' if wp_ready else 'Setup needed' }}</strong></div></div>
+  <div class="status-card"><span class="status-dot {{ 'ok' if ai_ready else 'warn' }}"></span><div><small>OpenAI</small><strong>{{ 'Connected' if ai_ready else 'Setup needed' }}</strong></div></div>
+  <div class="status-card"><span class="status-dot {{ 'ok' if automation else 'muted-dot' }}"></span><div><small>Automation</small><strong>{{ 'Running' if automation else 'Paused' }}</strong></div></div>
+  <div class="status-card"><span class="status-dot safe"></span><div><small>Publishing</small><strong>{{ publishing_mode|replace('_',' ')|title }}</strong></div></div>
 </div>
+
+<div class="metric-grid">
+  <div class="metric"><span>Ready</span><strong>{{ counts.ready }}</strong><small>topics waiting</small></div>
+  <div class="metric"><span>Scheduled</span><strong>{{ counts.scheduled }}</strong><small>dated topics</small></div>
+  <div class="metric"><span>Drafts</span><strong>{{ counts.drafts }}</strong><small>ready in WordPress</small></div>
+  <div class="metric"><span>Failed</span><strong>{{ counts.failed }}</strong><small>need attention</small></div>
+</div>
+
+<div class="two-col">
+  <section class="panel">
+    <div class="panel-head"><div><h2>Next content</h2><p class="muted">The next enabled topic in the queue.</p></div><a href="{{ url_for('topics') }}">View all</a></div>
+    {% if next_topic %}
+      <div class="next-topic">
+        <div class="topic-icon">✦</div>
+        <div><strong>{{ next_topic.title }}</strong><p>{{ next_topic.keywords or 'No keywords added' }}</p><span class="pill">{{ next_topic.status|replace('_',' ') }}</span>{% if next_topic.scheduled_at %}<span class="pill">{{ next_topic.scheduled_at.strftime('%d %b %Y %H:%M') }}</span>{% endif %}</div>
+      </div>
+    {% else %}
+      <div class="empty">No topics in the queue yet.</div>
+    {% endif %}
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><h2>Current workflow</h2><p class="muted">How AutoPost is configured.</p></div></div>
+    <div class="workflow-list">
+      <div><span>Frequency</span><strong>{{ frequency_mode|title }}</strong></div>
+      <div><span>Images</span><strong>Managed in Settings</strong></div>
+      <div><span>Publishing</span><strong>{{ publishing_mode|replace('_',' ')|title }}</strong></div>
+      <div><span>Safety</span><strong class="green">Human review available</strong></div>
+    </div>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Recent topics</h2><p class="muted">Latest content activity.</p></div></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Topic</th><th>Status</th><th>Schedule</th><th>WordPress</th></tr></thead>
+    <tbody>
+    {% for t in recent %}
+      <tr><td><strong>{{ t.title }}</strong><small>{{ t.category or 'Uncategorised' }}</small></td><td><span class="pill status-{{ t.status }}">{{ t.status|replace('_',' ') }}</span></td><td>{{ t.scheduled_at.strftime('%d %b %Y %H:%M') if t.scheduled_at else 'Automatic queue' }}</td><td>{% if t.wordpress_url %}<a href="{{ t.wordpress_url }}" target="_blank" rel="noopener">Open post ↗</a>{% else %}<span class="muted">—</span>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="4" class="empty">No content yet.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Activity log</h2><p class="muted">Recent system actions and errors.</p></div></div>
+  <div class="activity-list">
+    {% for l in logs %}<div class="activity-row"><span class="activity-dot {{ l.level }}"></span><div><strong>{{ l.event }}</strong><p>{{ l.detail or '—' }}</p></div><time>{{ l.created_at.strftime('%d %b %H:%M') }}</time></div>
+    {% else %}<div class="empty">No activity logged yet.</div>{% endfor %}
+  </div>
+</section>
 {% endblock %}

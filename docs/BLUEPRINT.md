@@ -1,64 +1,129 @@
-# AutoPost V1 Blueprint
+# AutoPost V1 Product Blueprint
 
-## Goal
+Developed by **Axon 1Pro** — https://axon.com.sg — support@axon.com.sg
 
-A very simple WebUI for a non-technical client or SEO agency.
+## Objective
 
-## User Experience
+A non-technical WebUI where a client or SEO agency can manage WordPress content automation without using n8n or editing scripts.
 
-1. Login.
-2. See dashboard.
-3. Connect WordPress.
-4. Connect OpenAI.
-5. Add topics.
-6. View, edit, schedule, disable, or delete topics.
-7. Set how many posts per week/month.
-8. AutoPost creates article, SEO data, and optional image.
-9. Send to WordPress as Draft.
-10. Review and publish.
+## Client journey
 
-## Dashboard Cards
+1. Login
+2. View dashboard
+3. Connect WordPress
+4. Connect OpenAI
+5. Add topics
+6. Edit, schedule, enable or disable topics
+7. Set posting frequency
+8. AutoPost generates article and image
+9. AutoPost sends the post to WordPress
+10. Draft Only by default
+11. Client reviews
+12. Client publishes, or optionally enables Auto Publish
 
-- WordPress: Connected / Not Connected
-- OpenAI: Connected / Not Connected
-- Automation: On / Off
-- Ready Topics
-- Drafts Created
-- Next Scheduled Post
-- Failed Jobs
+## Dashboard
 
-## Topic Fields
+Displays:
 
-- Topic
-- Keywords
-- Category
-- Notes
-- Scheduled date/time
-- Enabled
-- Status
+- WordPress connection
+- OpenAI connection
+- automation on/off
+- publishing mode
+- ready count
+- scheduled count
+- drafts count
+- failures
+- next topic
+- recent topics
+- activity log
 
-## Schedule Views
+## Topics & schedule
 
-Client should be able to view:
-- All upcoming scheduled topics
-- Weekly schedule
-- Monthly schedule
-- Drafts already created
-- Disabled topics
-- Failed jobs
+Fields:
 
-Every scheduled topic should be editable or disable-able without deleting it.
+- topic
+- keywords
+- category
+- notes
+- scheduled date/time
+- enabled
+- status
+
+Actions:
+
+- edit
+- enable/disable
+- generate now
+- retry
+- open WordPress result
+- publish a draft
+- delete
+
+## Automation
+
+Modes:
+
+- Manual only
+- Posts per week
+- Posts per month
+
+Automatic topics without an explicit date are selected from the ready queue based on cadence. Explicit scheduled topics take priority when due.
+
+## AI generation
+
+Per topic, AutoPost requests:
+
+- title
+- excerpt
+- meta description
+- category
+- tags
+- image prompt
+- image alt text
+- WordPress-ready HTML
+
+## Images
+
+When enabled:
+
+1. generate image
+2. upload image to WordPress Media Library
+3. set alt text
+4. assign as featured image
+
+## WordPress
+
+Uses WordPress REST API and a dedicated Application Password.
+
+Default post status is draft.
 
 ## Memory
 
-Use client memory to keep content consistent.
+The client memory is editable in the WebUI and included with article-generation instructions.
 
-Memory should be editable later from the WebUI. V1 may read from a Markdown file on the server.
+It should hold approved facts, tone, concepts, SEO direction, CTA wording, restrictions and image guidance.
 
-## V1 Defaults
+## Security
 
-- Draft Only
-- 2 posts/week
-- Images ON
-- SEO ON
-- Auto Publish OFF
+- HTTPS
+- CSRF
+- secure sessions
+- encrypted client credentials
+- .env excluded from Git
+- database excluded from Git
+- dedicated WordPress integration credentials
+
+## Deployment
+
+- German Ubuntu server
+- Gunicorn web service
+- separate scheduling worker
+- Nginx reverse proxy
+- Certbot SSL
+- domain: autopost.chezsuzette.sg
+
+## Commercial outline
+
+- Setup: USD 200 one time
+- Hosting: USD 150/year
+- OpenAI API: client purchases directly; suggested starting credit USD 5-10

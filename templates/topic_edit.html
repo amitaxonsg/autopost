@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Edit Topic · AutoPost{% endblock %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Content Queue</p><h1>Edit topic</h1><p class="muted">Update the brief or schedule without deleting the topic.</p></div><a class="btn secondary" href="{{ url_for('topics') }}">Back to topics</a></div>
+<section class="panel">
+<form method="post" class="form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label class="span-2">Topic<input name="title" value="{{ topic.title }}" required></label>
+  <label>Keywords<input name="keywords" value="{{ topic.keywords }}"></label>
+  <label>Category<input name="category" value="{{ topic.category }}"></label>
+  <label>Scheduled date & time<input type="datetime-local" name="scheduled_at" value="{{ topic.scheduled_at.strftime('%Y-%m-%dT%H:%M') if topic.scheduled_at else '' }}"></label>
+  <label class="span-2">Notes<textarea name="notes" rows="5">{{ topic.notes }}</textarea></label>
+  <div class="span-2 form-actions"><button class="btn primary" type="submit">Save changes</button></div>
+</form>
+</section>
+{% endblock %}

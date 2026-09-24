@@ -3,6 +3,10 @@ venv/
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 *.db
 instance/
 logs/
+.pytest_cache/
+.coverage
+.DS_Store

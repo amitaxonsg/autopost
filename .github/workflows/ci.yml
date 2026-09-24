@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -32,10 +33,11 @@ jobs:
           SESSION_COOKIE_SECURE: "0"
           DATABASE_URL: "sqlite:///:memory:"
           CREDENTIAL_ENCRYPTION_KEY: "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+          PYTHONPATH: "."
         shell: bash
         run: |
           set +e
-          pytest -vv > pytest-output.txt 2>&1
+          python -m pytest -vv > pytest-output.txt 2>&1
           code=$?
           cat pytest-output.txt
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"

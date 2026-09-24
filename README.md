@@ -1,226 +1,349 @@
 # AutoPost
 
-AutoPost is a simple WebUI for clients and SEO agencies to plan AI-assisted WordPress content, generate articles and featured images, and send them to WordPress as **drafts by default**.
+**AutoPost** is a lightweight WebUI for AI-assisted WordPress content automation. A client or SEO agency can add topics, schedule them, generate an article and featured image, and send the result to WordPress.
 
-## Commercial Outline
+**Default publishing mode: Draft Only.**
+
+Developed by **Axon 1Pro**  
+Website: https://axon.com.sg  
+Support: support@axon.com.sg
+
+## Commercial outline
 
 - One-time setup: **USD 200**
 - AutoPost hosting: **USD 150/year**
-- OpenAI API: client purchases directly from OpenAI; suggested initial top-up **USD 5-10**
-- OpenAI usage is paid directly by the client.
+- OpenAI API: purchased and billed directly by the client
+- Suggested initial OpenAI credit: **USD 5-10**
 
-## Recommended Starting Mode
+## V1 features implemented
 
-- 2 posts per week
-- Featured image generation: ON
-- SEO metadata: ON
-- Publishing mode: **Draft Only**
-- Auto-publish: OFF
+- Secure client/admin login
+- Professional responsive WebUI
+- Dashboard with connection, queue, draft and failure status
+- WordPress REST API connection
+- OpenAI API connection
+- Encrypted API key / WordPress Application Password storage
+- Add topics
+- Edit topics
+- Disable / re-enable topics
+- Delete topics
+- Manual Generate Now
+- Scheduled topics
+- Automatic weekly/monthly queue
+- Manual-only mode
+- Article generation
+- Title, excerpt, meta description, category, tags and image prompt generation
+- Featured image generation
+- WordPress Media Library upload
+- Featured image assignment
+- WordPress draft creation
+- Optional Auto Publish
+- Manual Publish button for created drafts
+- Retry failed items
+- Client brand memory editor
+- Activity log
+- Dedicated background worker
+- Gunicorn + Nginx deployment
+- Let's Encrypt / Certbot deployment instructions
+- Axon 1Pro branding and support links
 
-## Non-Technical Workflow
+## How it works
 
-```text
+~~~text
 Client Login
     ↓
-Add Topic / Schedule Topics
+Add / Schedule Topics
     ↓
-AutoPost Generates Article + SEO + Image
+AutoPost checks the queue
     ↓
-Send to WordPress
+OpenAI creates article + SEO content + image
     ↓
-DRAFT
+Image uploads to WordPress Media Library
     ↓
-Client Reviews / Edits
+Article goes to WordPress
+    ↓
+DRAFT by default
+    ↓
+Client reviews / edits
     ↓
 Publish
-```
+~~~
 
-## WebUI
+## Publishing modes
 
-### Dashboard
-Shows:
-- WordPress connection status
-- OpenAI connection status
-- Automation ON/OFF
-- Posts per week/month
-- Drafts ready
-- Next scheduled article
-- Recent activity
-- Failed jobs
+### Draft Only
+Recommended default. AutoPost creates a WordPress draft. Nothing goes live automatically.
 
-### Topics & Schedule
-Client can:
-- Add a topic
-- Edit a topic
-- Enable/disable a topic
-- Delete a topic
-- Add keywords
-- Select category
-- Add notes
-- Set target date/time
-- Generate immediately
-- View all scheduled topics
-- View all completed drafts
-- Retry failed items
+### Approval Required
+AutoPost creates a draft. The user can review it and use the AutoPost Publish action when ready.
 
-Suggested statuses:
-- `ready`
-- `disabled`
-- `scheduled`
-- `generating`
-- `draft_created`
-- `failed`
-- `published`
+### Auto Publish
+AutoPost publishes directly according to the configured schedule. This must be explicitly enabled.
 
-### Automation
-Modes:
-- Manual only
-- Posts per week
-- Posts per month
-- Custom schedule
+## Topic controls
 
-Settings:
-- Frequency
-- Preferred weekdays
-- Preferred time
-- Timezone
-- Generate featured image ON/OFF
-- SEO metadata ON/OFF
-- Publishing mode
+Every topic can be:
 
-### Publishing Modes
+- edited
+- scheduled
+- generated immediately
+- disabled without deleting
+- re-enabled later
+- deleted
+- retried after failure
 
-#### Draft Only
-Default and recommended. Nothing goes live automatically.
+Statuses include:
 
-#### Approval Required
-Generate first, then wait for user approval before publishing.
+- ready
+- scheduled
+- generating
+- draft_created
+- failed
+- published
 
-#### Auto Publish
-Optional. Must be explicitly enabled by the client.
+## Brand memory
 
-## WordPress Connection
+The initial client memory file is:
 
-Use:
-- Website URL
-- Dedicated WordPress username
-- WordPress Application Password
-- Test Connection button
-
-Do **not** use the client's normal WordPress password.
-
-## OpenAI Connection
-
-Use:
-- Provider: OpenAI
-- Client's API key
-- Recommended low-cost model
-- Test Connection button
-
-The client purchases API credits directly from OpenAI.
-
-## Client Memory / Brand Preferences
-
-Each client gets a memory file, e.g.:
-
-`clients/chezsuzette/MEMORY.md`
+~~~text
+clients/chezsuzette/MEMORY.md
+~~~
 
 It can contain:
-- Business description
-- Brand voice
-- Target audience
-- Important facts
-- Preferred wording
-- Topics to emphasize
-- Topics to avoid
-- Prohibited claims
-- CTA wording
-- SEO priorities
-- Image direction
-- Preferred internal links
 
-AutoPost should include this memory when generating future content.
+- business description
+- approved facts
+- brand tone
+- target audience
+- preferred concepts
+- keywords
+- calls to action
+- image style
+- internal link guidance
+- claims/topics to avoid
 
-## Initial Stack
+The WebUI includes a **Brand Memory** page so the client or administrator can update these instructions.
 
-- Python 3.12+
-- Flask
-- SQLAlchemy
-- SQLite for V1
-- APScheduler for V1
+## Recommended initial settings
+
+- Frequency: 2 posts per week
+- Publishing: Draft Only
+- Featured image: ON
+- SEO content: ON
+- Auto Publish: OFF
+
+## Stack
+
+- Python / Flask
+- Flask-SQLAlchemy
+- Flask-WTF CSRF protection
+- SQLite for the first client
 - OpenAI API
 - WordPress REST API
 - Gunicorn
 - Nginx
-- Let's Encrypt
+- systemd
+- Let's Encrypt / Certbot
 
-For multiple clients later, move the database to PostgreSQL and encrypt per-client secrets.
+For larger multi-client use, move the database to PostgreSQL and add per-tenant user/role management.
 
-## Initial Deployment
+## Production deployment
 
 Pilot domain:
 
-`autopost.chezsuzette.sg`
+~~~text
+autopost.chezsuzette.sg
+~~~
 
-Suggested server path:
+Target path:
 
-`/var/www/autopost.chezsuzette.sg`
+~~~text
+/var/www/autopost.chezsuzette.sg
+~~~
 
-## Build Phases
+### 1. DNS
 
-### Phase 1
-- DNS
-- Server directory
-- Python virtual environment
-- Flask app
-- Login
-- Dashboard
-- SSL
+Create an A record:
 
-### Phase 2
-- WordPress connection
-- OpenAI connection
-- Test Connection buttons
+~~~text
+Host: autopost
+Type: A
+Value: <German server public IP>
+~~~
 
-### Phase 3
-- Topic CRUD
-- Edit/disable/delete
-- Scheduling
-- Queue/status view
+Wait until:
 
-### Phase 4
-- AI article generation
-- SEO title
-- Excerpt
-- Meta description
-- Tags/categories
-- Client memory injection
+~~~bash
+dig +short autopost.chezsuzette.sg
+~~~
 
-### Phase 5
-- AI featured image generation
-- Upload to WordPress Media Library
-- Assign featured image
+returns the German server IP.
 
-### Phase 6
-- WordPress Draft creation
-- Approval mode
-- Optional auto-publish
-- Activity logs
-- Retry failed jobs
+### 2. Clone
+
+~~~bash
+cd /var/www
+git clone https://github.com/amitaxonsg/autopost.git autopost.chezsuzette.sg
+cd autopost.chezsuzette.sg
+~~~
+
+### 3. Run deployment helper
+
+Run as root:
+
+~~~bash
+bash scripts/deploy_ubuntu.sh autopost.chezsuzette.sg support@axon.com.sg
+~~~
+
+The script installs Python, Nginx, Certbot and Git, creates the virtual environment, installs dependencies, creates systemd services, configures Nginx and generates secure Flask/Fernet keys.
+
+### 4. Edit environment
+
+Before client use:
+
+~~~bash
+nano /var/www/autopost.chezsuzette.sg/.env
+~~~
+
+Set at minimum:
+
+~~~text
+ADMIN_EMAIL=<login email>
+ADMIN_PASSWORD=<strong unique password>
+~~~
+
+Do not paste client OpenAI or WordPress credentials into Git. Enter them through the AutoPost WebUI after login.
+
+### 5. Restart
+
+~~~bash
+systemctl restart autopost autopost-worker
+systemctl status autopost --no-pager
+systemctl status autopost-worker --no-pager
+~~~
+
+### 6. Verify HTTP
+
+~~~bash
+curl -i http://autopost.chezsuzette.sg/healthz
+~~~
+
+Expected:
+
+~~~json
+{"app":"AutoPost","status":"ok"}
+~~~
+
+### 7. Activate SSL
+
+Only after DNS resolves to this server:
+
+~~~bash
+certbot --nginx -d autopost.chezsuzette.sg \
+  --email support@axon.com.sg \
+  --agree-tos --no-eff-email --redirect
+~~~
+
+Then test:
+
+~~~bash
+curl -I https://autopost.chezsuzette.sg/healthz
+certbot renew --dry-run
+~~~
+
+## WordPress setup
+
+Create a dedicated WordPress integration account.
+
+Recommended:
+
+- username: autopost
+- role: Editor for the pilot, so category/tag/media/post operations work
+- create a WordPress Application Password for AutoPost
+- do not use the client's normal WordPress password
+
+Then open **Connections & Settings** in AutoPost and enter:
+
+- WordPress website URL
+- username
+- Application Password
+- Test Connection
+
+## OpenAI setup
+
+The client should use their own OpenAI API project and billing.
+
+In AutoPost:
+
+- enter the client's API key
+- choose a low-cost text model available to their project
+- choose the configured image model
+- click Test Connection
+
+The model names are configurable; the application is not tied to an expensive model.
 
 ## Security
 
-Before public production:
-- HTTPS only
-- Secure session cookies
+Implemented:
+
 - CSRF protection
-- Rate limiting
-- Encrypted API keys and WordPress credentials
-- Dedicated WordPress integration account
-- WordPress Application Passwords
-- Audit log for publishing actions
-- Never commit real secrets to Git
+- secure session cookie settings
+- API/Application Password encryption using Fernet
+- .env excluded from Git
+- database excluded from Git
+- dedicated WordPress Application Password support
+- Draft Only default
 
-## V1 Status
+Operational requirements:
 
-This repository starts as a V1 scaffold and product blueprint. The first live deployment should remain **Draft Only** until the workflow is fully tested.
+- use HTTPS in production
+- use a strong unique admin password
+- protect the server and SSH access
+- keep the generated CREDENTIAL_ENCRYPTION_KEY backed up securely
+- never change the encryption key after credentials are saved unless credentials are re-entered
+- do not commit .env or the production database
+
+## Services
+
+WebUI:
+
+~~~bash
+systemctl status autopost
+journalctl -u autopost -f
+~~~
+
+Scheduler worker:
+
+~~~bash
+systemctl status autopost-worker
+journalctl -u autopost-worker -f
+~~~
+
+## Updating from Git
+
+~~~bash
+cd /var/www/autopost.chezsuzette.sg
+git pull --ff-only
+source venv/bin/activate
+pip install -r requirements.txt
+systemctl restart autopost autopost-worker
+~~~
+
+## Important V1 note about SEO plugins
+
+AutoPost generates a title, excerpt, meta description, category, tags and article structure. WordPress core does not expose every third-party SEO plugin's private meta fields through the same generic REST interface. Plugin-specific Yoast/RankMath field mapping should be added only if the client's chosen SEO plugin requires it.
+
+## Repository status
+
+V1 is coded for server deployment and UAT. Recommended rollout:
+
+1. deploy on the German server
+2. activate SSL
+3. configure login
+4. connect OpenAI
+5. connect WordPress
+6. add one test topic
+7. confirm Draft Only workflow
+8. confirm featured image
+9. test scheduling
+10. keep Auto Publish OFF until UAT is complete

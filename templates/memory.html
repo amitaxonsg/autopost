@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Brand Memory · AutoPost{% endblock %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Content Rules</p><h1>Brand memory</h1><p class="muted">These instructions are included whenever AutoPost writes an article.</p></div></div>
+<section class="panel">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Client memory / editorial guide<textarea class="memory-editor" name="memory" rows="28">{{ memory }}</textarea></label>
+    <div class="form-actions"><button class="btn primary" type="submit">Save memory</button></div>
+  </form>
+</section>
+<div class="safety-banner">Keep this file factual. Add the approved tone, business facts, preferred concepts, SEO priorities, calls to action, image direction, and claims that AutoPost must avoid.</div>
+{% endblock %}

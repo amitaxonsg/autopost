@@ -1,10 +1,25 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="card" style="max-width:420px;margin:80px auto">
-<h1>AutoPost Login</h1>
-<p>Client login UI scaffold. Authentication will be completed in Phase 1.</p>
-<label>Email</label><input style="width:100%;padding:10px;margin:8px 0" type="email">
-<label>Password</label><input style="width:100%;padding:10px;margin:8px 0 16px" type="password">
-<button>Login</button>
+{% block title %}Login · AutoPost{% endblock %}
+{% block public_content %}
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="brand-mark large">A</span>
+      <div><h1>AutoPost</h1><p>AI-assisted WordPress content, under your control.</p></div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    <form method="post" class="stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Email<input type="email" name="email" autocomplete="username" required></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="btn primary full" type="submit">Sign in</button>
+    </form>
+    <div class="login-note">
+      <strong>Safe starting mode:</strong> AutoPost creates WordPress drafts for review. Nothing is published automatically unless enabled in Settings.
+    </div>
+    <p class="login-footer">{{ brand_byline }} · <a href="{{ brand_url }}" target="_blank" rel="noopener">axon.com.sg</a> · <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+  </div>
 </div>
 {% endblock %}

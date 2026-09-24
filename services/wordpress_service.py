@@ -41,6 +41,8 @@ def ensure_term(url, username, app_password, taxonomy: str, name: str):
                 return term_id
         except Exception:
             pass
+    if r.status_code in (401, 403):
+        return None
     r.raise_for_status()
     return r.json()["id"]
 

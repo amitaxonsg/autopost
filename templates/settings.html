@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Settings · AutoPost{% endblock %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Configuration</p><h1>Connections & settings</h1><p class="muted">Connect once, then control how often AutoPost creates content.</p></div></div>
+
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="settings-grid">
+  <section class="panel">
+    <div class="panel-head"><div><h2>WordPress</h2><p class="muted">Use a dedicated WordPress user and Application Password.</p></div><span class="connection-badge {{ 'connected' if settings.has_wp_password else '' }}">{{ 'Configured' if settings.has_wp_password else 'Not configured' }}</span></div>
+    <label>Website URL<input name="wordpress_url" type="url" placeholder="https://blog.example.com" value="{{ settings.wordpress_url }}"></label>
+    <label>Username<input name="wordpress_username" value="{{ settings.wordpress_username }}" placeholder="autopost"></label>
+    <label>Application Password<input name="wordpress_app_password" type="password" autocomplete="new-password" placeholder="{{ 'Saved — leave blank to keep' if settings.has_wp_password else 'Enter Application Password' }}"></label>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h2>OpenAI</h2><p class="muted">The client owns the API account and pays OpenAI directly.</p></div><span class="connection-badge {{ 'connected' if settings.has_openai_key else '' }}">{{ 'Configured' if settings.has_openai_key else 'Not configured' }}</span></div>
+    <label>API Key<input name="openai_api_key" type="password" autocomplete="new-password" placeholder="{{ 'Saved — leave blank to keep' if settings.has_openai_key else 'Enter API key' }}"></label>
+    <label>Text model<input name="openai_model" value="{{ settings.openai_model }}" placeholder="Low-cost supported model"></label>
+    <label>Image model<input name="image_model" value="{{ settings.image_model }}" placeholder="gpt-image-1-mini"></label>
+    <p class="help">Model names are configurable so you can select a low-cost model available to the client's OpenAI project.</p>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><h2>Automation</h2><p class="muted">Draft Only is recommended for the pilot.</p></div></div>
+  <div class="form-grid">
+    <label>Frequency
+      <select name="frequency_mode">
+        <option value="manual" {% if settings.frequency_mode=='manual' %}selected{% endif %}>Manual only</option>
+        <option value="weekly" {% if settings.frequency_mode=='weekly' %}selected{% endif %}>Posts per week</option>
+        <option value="monthly" {% if settings.frequency_mode=='monthly' %}selected{% endif %}>Posts per month</option>
+      </select>
+    </label>
+    <label>Posts per week<input type="number" min="1" max="14" name="posts_per_week" value="{{ settings.posts_per_week }}"></label>
+    <label>Posts per month<input type="number" min="1" max="60" name="posts_per_month" value="{{ settings.posts_per_month }}"></label>
+    <label>Preferred time<input type="time" name="preferred_time" value="{{ settings.preferred_time }}"></label>
+    <label>Timezone<input name="timezone" value="{{ settings.timezone }}"></label>
+    <label>Publishing mode
+      <select name="publishing_mode">
+        <option value="draft" {% if settings.publishing_mode=='draft' %}selected{% endif %}>Draft Only — recommended</option>
+        <option value="approval" {% if settings.publishing_mode=='approval' %}selected{% endif %}>Approval Required</option>
+        <option value="auto_publish" {% if settings.publishing_mode=='auto_publish' %}selected{% endif %}>Auto Publish</option>
+      </select>
+    </label>
+  </div>
+  <div class="toggle-row">
+    <label class="toggle"><input type="checkbox" name="automation_enabled" value="1" {% if settings.automation_enabled=='1' %}checked{% endif %}><span></span>Automation enabled</label>
+    <label class="toggle"><input type="checkbox" name="generate_image" value="1" {% if settings.generate_image=='1' %}checked{% endif %}><span></span>Generate featured image</label>
+    <label class="toggle"><input type="checkbox" name="seo_enabled" value="1" {% if settings.seo_enabled=='1' %}checked{% endif %}><span></span>Generate SEO fields</label>
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">Save settings</button></div>
+</section>
+</form>
+
+<div class="settings-grid">
+  <section class="panel"><h3>Test WordPress</h3><p class="muted">Confirms the saved URL, username and Application Password.</p><form method="post" action="{{ url_for('test_wordpress_route') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary">Test connection</button></form></section>
+  <section class="panel"><h3>Test OpenAI</h3><p class="muted">Makes a very small API request using the saved model.</p><form method="post" action="{{ url_for('test_openai_route') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary">Test connection</button></form></section>
+</div>
+
+<div class="safety-banner"><strong>Publishing safety:</strong> Draft Only sends new content to WordPress as drafts. Auto Publish must be deliberately selected above.</div>
+{% endblock %}

@@ -203,12 +203,17 @@ def schedule_due():
     if mode == "manual":
         return None
 
-    now = datetime.utcnow()
+    tz_name = get_setting("timezone", Config.DEFAULT_TIMEZONE)
+    try:
+        local_now = datetime.now(ZoneInfo(tz_name)).replace(tzinfo=None)
+    except Exception:
+        local_now = datetime.utcnow()
+
     explicit = Topic.query.filter(
         Topic.enabled.is_(True),
         Topic.status.in_(["ready", "scheduled"]),
         Topic.scheduled_at.isnot(None),
-        Topic.scheduled_at <= now,
+        Topic.scheduled_at <= local_now,
     ).order_by(Topic.scheduled_at.asc()).first()
     if explicit:
         return explicit
@@ -228,7 +233,16 @@ def schedule_due():
         count = max(1, int(get_setting("posts_per_week", "2")))
         interval = timedelta(days=7 / count)
 
-    if last_run and now < last_run + interval:
+    preferred = get_setting("preferred_time", "10:00")
+    try:
+        hh, mm = [int(x) for x in preferred.split(":", 1)]
+        preferred_today = local_now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+        if local_now < preferred_today:
+            return None
+    except Exception:
+        pass
+
+    if last_run and local_now < last_run + interval:
         return None
 
     return Topic.query.filter(
@@ -243,7 +257,7 @@ def process_due_once(app):
         if not topic:
             return False
         process_topic(topic.id)
-        set_setting("last_auto_run", datetime.utcnow().isoformat(timespec="seconds"))
+        set_setting("last_auto_run", datetime.now(ZoneInfo(get_setting("timezone", Config.DEFAULT_TIMEZONE))).replace(tzinfo=None).isoformat(timespec="seconds"))
         return True
 
 def register_routes(app):
